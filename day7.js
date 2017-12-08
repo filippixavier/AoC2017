@@ -6,73 +6,70 @@ function main(input) {
 	for (let line of programDescript) {
 		let description = line.match(/(\w+)/g);
 		name = description[0];
-		if(!nodeMap[name]) {
-			nodeMap[name] = {};
+		if (!nodeMap[name]) {
+			nodeMap[name] = { name };
 		}
 		nodeMap[name].weight = Number(description[1]);
 		nodeMap[name].childs = description.slice(2);
 		for (let child of nodeMap[name].childs) {
-			if(!nodeMap[child]) {
+			if (!nodeMap[child]) {
 				nodeMap[child] = {};
 			}
 			nodeMap[child].parent = name;
 		}
 	}
 
-	while(nodeMap[name].parent) {
+	while (nodeMap[name].parent) {
 		name = nodeMap[name].parent;
 	}
 
 	recursiveWeight(nodeMap, name);
 	weight = findUnbalance(nodeMap, name);
 
-	return {name, weight};
+	return { name, weight };
 }
 
 function recursiveWeight(nodeMap, nodeName) {
-	for(let node of nodeMap[nodeName].childs) {
-		nodeMap[nodeName].weight += recursiveWeight(nodeMap, node);
+	let node = nodeMap[nodeName];
+	node.cumulatedWeight = node.weight;
+	for (let child of node.childs) {
+		node.cumulatedWeight += recursiveWeight(nodeMap, child);
 	}
-	return nodeMap[nodeName].weight;
+
+	return node.cumulatedWeight;
 }
 
-function findUnbalance (nodeMap, nodeName) {
+//Very bad and error prone: prefer using a dfs and return the first unbalanced node from the leaves
+function findUnbalance(nodeMap, nodeName) {
 	let weight,
 		list = [nodeName];
-	while(list.length > 0) {
-		let name = list.shift();
-		if(nodeMap[name].childs.length === 0) {
+	let fix;
+	while (list.length > 0) {
+		let parentNode = nodeMap[list.shift()];
+		let count = 0;
+		let firstNode = nodeMap[parentNode.childs[0]];
+		let markedNode = firstNode;
+		if (parentNode.childs.length === 0) {
 			continue;
 		}
-		weight = nodeMap[nodeMap[name].childs[0]].weight;
-		let count = 0;
-		for(let node of nodeMap[name].childs) {
-			if(weight !== nodeMap[node].weight) {
+		weight = nodeMap[parentNode.childs[0]].cumulatedWeight;
+		for (let node of parentNode.childs) {
+			if (weight !== nodeMap[node].cumulatedWeight) {
+				markedNode = nodeMap[node];
 				count++;
 			}
 			list.push(node);
 		}
-		if(count > 1) {
-			return nodeMap[nodeMap[name].childs[1]].weight;
+		if (count > 1) {
+			fix = firstNode.weight + markedNode.cumulatedWeight - firstNode.cumulatedWeight;
+			// return firstNode.weight + markedNode.cumulatedWeight - firstNode.cumulatedWeight;
 		}
-		else if(count === 1) {
-			return weight;
+		else if (count === 1) {
+			fix = markedNode.weight + firstNode.cumulatedWeight - markedNode.cumulatedWeight;
+			// return markedNode.weight + firstNode.cumulatedWeight - markedNode.cumulatedWeight;
 		}
 	}
+	return fix;
 }
 
-var test = `pbga (66)
-xhth (57)
-ebii (61)
-havc (66)
-ktlj (57)
-fwft (72) -> ktlj, cntj, xhth
-qoyq (66)
-padx (45) -> pbga, havc, qoyq
-tknk (41) -> ugml, padx, fwft
-jptl (61)
-ugml (68) -> gyxo, ebii, jptl
-gyxo (61)
-cntj (57)`
-
-main(test);
+console.log(main(document.body.innerText.trim()));
