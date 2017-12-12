@@ -5,19 +5,30 @@ function main(input) {
 		acc[from] = to;
 		acc[from].checked = false;
 		return acc;
-	}, []);
+	}, {});
 	let nodes = [];
-	let heap = [0];
-	pipes[0].checked = true;
-	while(heap.length > 0) {
-		let element = heap.shift();
-		nodes.push(element);
-		for(let child of pipes[element]) {
-			if(!pipes[child].checked) {
-				pipes[child].checked = true;
-				heap.push(child);
+	let index = 0;
+	let heap = [];
+	for(let pipe of Object.keys(pipes)) {
+		if(!pipes[pipe]) {
+			continue;
+		}
+		nodes[index] = [pipe];
+		heap.push(pipes[pipe]);
+		pipes[pipe] = undefined;
+		while(heap.length > 0) {
+			let childs = heap.shift();
+			for(let child of childs) {
+				if(pipes[child]) {
+					heap.push(pipes[child]);
+					nodes[index].push(child);
+					pipes[child] = undefined;
+				}
 			}
 		}
+		index++;
 	}
 	return nodes;
 }
+
+main(document.body.innerText.trim());
