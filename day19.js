@@ -6,6 +6,7 @@ function followPath(input) {
 	let direction = directions.DOWN;
 	let letters = '';
 	let hasNext = true;
+	let steps = 0;
 
 	for (let x = 0; x < board[0].length; x++) {
 		if (board[0][x] === '|') {
@@ -35,7 +36,9 @@ function followPath(input) {
 
 		coordinate.x += direction.x;
 		coordinate.y += direction.y;
+		steps++;
 	}
+	console.log(steps);
 	return letters;
 }
 
