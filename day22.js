@@ -4,13 +4,13 @@ function main(input, rounds) {
 	lines.forEach((line, i) => {
 		line.split('').forEach((char, j) => {
 			if (char === '#') {
-				map[j + ',' + i] = true;
+				map[j + ',' + i] = 'infected';
 			}
 		})
 	});
-	let virus = new Carrier((lines[0].length - 1) / 2, (lines.length - 1) / 2 , map);
+	let virus = new Carrier((lines[0].length - 1) / 2, (lines.length - 1) / 2, map);
 
-	for(let i = 0; i < rounds; i++) {
+	for (let i = 0; i < rounds; i++) {
 		virus.burst();
 	}
 
@@ -29,12 +29,18 @@ class Carrier {
 
 	burst() {
 		let coordinate = this.x + ',' + this.y;
-		let infected = !!this.infectedNodes[coordinate];
-		this.direction = Carrier[this.direction[infected? 'right' : 'left']];
-		this.infectedNodes[coordinate] = !infected;
-		if(!infected) {
+		let state;
+		if (!this.infectedNodes[coordinate]) {
+			this.infectedNodes[coordinate] = 'clean';
+		}
+		state = Carrier.states[this.infectedNodes[coordinate]];
+		this.direction = Carrier[this.direction[state.turn]];
+
+		if (this.infectedNodes[coordinate] === 'weakened') {
 			this.infection++;
 		}
+
+		this.infectedNodes[coordinate] = state.next;
 
 		this.x += this.direction.x;
 		this.y += this.direction.y;
@@ -45,7 +51,9 @@ class Carrier {
 			x: 0,
 			y: -1,
 			left: 'left',
-			right: 'right'
+			right: 'right',
+			back: 'down',
+			none: 'up'
 		};
 	}
 
@@ -54,7 +62,9 @@ class Carrier {
 			x: 0,
 			y: 1,
 			left: 'right',
-			right: 'left'
+			right: 'left',
+			back: 'up',
+			none: 'down'
 		};
 	}
 
@@ -63,7 +73,9 @@ class Carrier {
 			x: -1,
 			y: 0,
 			left: 'down',
-			right: 'up'
+			right: 'up',
+			back: 'right',
+			none: 'left'
 		};
 	}
 
@@ -72,8 +84,31 @@ class Carrier {
 			x: 1,
 			y: 0,
 			left: 'up',
-			right: 'down'
+			right: 'down',
+			back: 'left',
+			none: 'right'
 		};
+	}
+
+	static get states() {
+		return {
+			clean: {
+				next: 'weakened',
+				turn: 'left'
+			},
+			weakened: {
+				next: 'infected',
+				turn: 'none'
+			},
+			infected: {
+				next: 'flagged',
+				turn: 'right'
+			},
+			flagged: {
+				next: 'clean',
+				turn: 'back'
+			}
+		}
 	}
 }
 
