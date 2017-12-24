@@ -3,12 +3,17 @@ function main(input) {
     return bfs([], nodes, 0, 0);
 }
 
-function bfs (array, nodes, value, sum) {
+function main2(input) {
+    let nodes = input.split('\n').map((line) => new Element(line));
+    return bfslength([], nodes, 0, 0);
+}
+
+function bfs(array, nodes, value, sum) {
     let maxSum = sum
-    for(let node of nodes) {
-        if(array.indexOf(node) === -1 && node.connect(value) > -1) {
+    for (let node of nodes) {
+        if (array.indexOf(node) === -1 && node.connect(value) > -1) {
             let current = bfs([...array, node], nodes, node.connect(value), sum + node.sum);
-            if(current > maxSum) {
+            if (current > maxSum) {
                 maxSum = current;
             }
         }
@@ -16,14 +21,31 @@ function bfs (array, nodes, value, sum) {
     return maxSum;
 }
 
+function bfslength(array, nodes, value, sum) {
+    let maxSum = sum;
+    let maxLength = array.length;
+    for (let node of nodes) {
+        if (array.indexOf(node) === -1 && node.connect(value) > -1) {
+            let current = bfslength([...array, node], nodes, node.connect(value), sum + node.sum);
+            if (current.length > maxLength) {
+                maxLength = current.length;
+                maxSum = current.sum;
+            } else if(current.length === maxLength && current.sum > maxSum) {
+                maxSum = current.sum;
+            } 
+        }
+    }
+    return { sum: maxSum, length: maxLength };
+}
+
 class Element {
     constructor(pins) {
         [this.a, this.b] = pins.split('/').map(Number);
     }
     connect(pin) {
-        if(pin === this.a) {
+        if (pin === this.a) {
             return this.b;
-        } else if(pin === this.b) {
+        } else if (pin === this.b) {
             return this.a;
         }
         return -1;
@@ -33,7 +55,16 @@ class Element {
     }
 }
 
-var test = `25/13
+var test = `0/2
+2/2
+2/3
+3/4
+3/5
+0/1
+10/1
+9/10`;
+
+var input = `25/13
 4/43
 42/42
 39/40
@@ -92,4 +123,5 @@ var test = `25/13
 50/50
 `;
 
-console.log(main(test));
+console.log(main(input));
+console.log(main2(input));
