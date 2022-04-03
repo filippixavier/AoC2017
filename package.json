@@ -15,8 +15,5 @@
   "bugs": {
     "url": "https://github.com/filippixavier/AoC2017/issues"
   },
-  "homepage": "https://github.com/filippixavier/AoC2017#readme",
-  "dependencies": {
-    "eslint": "^4.13.0"
-  }
+  "homepage": "https://github.com/filippixavier/AoC2017#readme"
 }
